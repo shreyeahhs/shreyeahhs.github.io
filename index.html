@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shreyas · Data Science and AI</title>
+<meta name="description" content="Shreyas, Administrator at the Centre for Data Science and AI, University of Glasgow. Author of Prompt Corpus, developer of Vele and Juggle.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232d6a9a'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Arial,sans-serif' font-size='34' font-weight='600' fill='%23fff'%3Es.%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="Shreyas · Data Science and AI">
+<meta property="og:description" content="Administrator at the Centre for Data Science and AI, University of Glasgow. Author of Prompt Corpus, developer of Vele and Juggle.">
+<meta name="theme-color" content="#2d6a9a">
+<link rel="preload" as="image" href="assets/sky.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f1114;
+  --ink-2:#4d525c;
+  --lav:#eeedf9;
+  --lav-1:#a9a8db;
+  --line:rgba(15,17,20,.08);
+  --v:0;
+  --ease:cubic-bezier(.2,.7,.15,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:"Outfit",Arial,sans-serif;color:#fff;background:#2d6a9a;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+::selection{background:var(--lav-1);color:var(--ink)}
+
+/* ───────── fixed painting ───────── */
+.world{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.world .paint{
+  position:absolute;left:-2%;top:-1%;width:104%;height:116%;
+  object-fit:cover;object-position:62% top;
+  animation:settle 2.4s var(--ease) both;
+}
+@keyframes settle{from{transform:scale(1.04)}to{transform:none}}
+#birds{position:absolute;inset:0;width:100%;height:100%}
+/* static paper grain over the whole page, micro1-style */
+.tex{position:fixed;inset:0;z-index:55;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' seed='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='table' tableValues='0 .55'/></feComponentTransfer></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size:300px 300px}
+.tex.fine{opacity:.22;mix-blend-mode:soft-light;background-size:150px 150px}
+/* legibility shade on the left only, where the text lives; the painting itself stays crisp */
+.veil{position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(6,24,40,.28) 0%,rgba(6,24,40,0) 18%),
+    linear-gradient(90deg,rgba(6,24,40,calc(.30 + .16*var(--v))) 0%,rgba(6,24,40,calc(.14 + .10*var(--v))) 34%,rgba(6,24,40,0) 58%)}
+
+/* ───────── nav ───────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;padding:22px 28px;transition:opacity .5s,transform .7s var(--ease)}
+.nav.hide{opacity:0;transform:translateY(-20px);pointer-events:none}
+.nav-links{display:flex;flex-direction:column;gap:5px;font-size:13.5px;font-weight:500}
+.nav-links a{opacity:.9;width:max-content;transition:opacity .3s,transform .4s var(--ease)}
+.nav-links a:hover{opacity:1;transform:translateX(4px)}
+.brand{font-weight:600;font-size:21px;letter-spacing:-.03em;padding-top:4px}
+.nav-right{display:flex;justify-content:flex-end;align-items:center;gap:22px;font-size:14px;font-weight:500}
+
+.pill{display:inline-flex;align-items:center;gap:14px;background:rgba(255,255,255,.94);color:var(--ink);border:0;cursor:pointer;
+  border-radius:10px;padding:5px 5px 5px 16px;font-weight:500;font-size:14px;letter-spacing:-.01em;
+  box-shadow:0 8px 24px -10px rgba(0,0,0,.35);transition:transform .5s var(--ease),background .3s}
+.pill .sq{width:28px;height:28px;border-radius:7px;background:#121316;color:#fff;display:grid;place-items:center;transition:transform .5s var(--ease)}
+.pill:hover{transform:translateY(-1px)}
+.pill:hover .sq{transform:translateX(3px)}
+
+.bar{position:fixed;top:14px;left:50%;z-index:30;transform:translate(-50%,-140%);opacity:0;
+  display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.88);color:var(--ink);
+  border:1px solid rgba(15,17,20,.06);border-radius:14px;padding:6px 6px 6px 18px;
+  backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  box-shadow:0 16px 40px -18px rgba(10,20,30,.35);transition:transform .7s var(--ease),opacity .5s}
+.bar.show{transform:translate(-50%,0);opacity:1}
+.bar .b-brand{font-weight:600;font-size:19px;letter-spacing:-.03em;margin-right:14px}
+.bar a.l{font-size:14.5px;font-weight:500;padding:8px 11px;border-radius:9px;transition:background .3s}
+.bar a.l:hover{background:rgba(15,17,20,.05)}
+.bar .go{margin-left:6px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-weight:500;font-size:14.5px;cursor:pointer;color:var(--ink);transition:background .3s,color .3s}
+.bar .go:hover{background:#121316;color:#fff}
+
+/* ───────── title card ───────── */
+main{position:relative;z-index:5}
+:root{--gx:clamp(20px,7vw,128px);--col:min(560px,42vw)}
+.hero{min-height:100svh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;padding:120px var(--gx) 16vh;position:relative}
+.hero .eyebrow{font-size:12px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;opacity:.88}
+.hero h1{font-weight:500;letter-spacing:-.035em;line-height:1;font-size:clamp(44px,5.2vw,78px);margin:18px 0 18px}
+.hero .role{font-size:clamp(16px,1.35vw,19px);font-weight:400;opacity:.92;max-width:26em;line-height:1.55;text-wrap:balance}
+.hero .also{margin-top:12px;font-size:14px;letter-spacing:.06em;opacity:.78}
+.hero .in{opacity:0;transform:translateY(18px);filter:blur(8px);transition:opacity 1.4s var(--ease),transform 1.4s var(--ease),filter 1.4s var(--ease)}
+.hero.on .in{opacity:1;transform:none;filter:none}
+.hero.on .in.d1{transition-delay:.25s}.hero.on .in.d2{transition-delay:.45s}.hero.on .in.d3{transition-delay:.65s}
+.scroll-hint{position:absolute;left:var(--gx);bottom:30px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;opacity:.85}
+.scroll-hint b{width:1px;height:46px;background:linear-gradient(#fff,rgba(255,255,255,0));animation:drip 2.4s var(--ease) infinite;transform-origin:top}
+@keyframes drip{0%{transform:scaleY(0)}55%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
+.ts{text-shadow:0 2px 24px rgba(4,16,30,.45),0 1px 2px rgba(4,16,30,.25)}
+
+/* ───────── the credits ───────── */
+.credits{padding:20vh var(--gx) 30vh;text-align:left}
+.cr{will-change:opacity}
+.blk{margin:0 0 clamp(150px,30vh,280px);max-width:var(--col)}
+.blk.wide{max-width:min(640px,48vw)}
+.lbl{font-size:11.5px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;opacity:.72;margin-bottom:22px}
+.name{font-size:clamp(24px,2.4vw,34px);font-weight:500;letter-spacing:-.02em;line-height:1.2}
+.name.xl{font-size:clamp(32px,3.6vw,54px);letter-spacing:-.03em;line-height:1.05}
+.det{font-size:clamp(15.5px,1.2vw,18px);line-height:1.6;opacity:.9;margin-top:8px}
+.det.small{font-size:14.5px;letter-spacing:.04em;opacity:.72}
+.gap{height:56px}
+.lnk{border-bottom:1px solid rgba(255,255,255,.45);padding-bottom:1px;transition:border-color .3s}
+.lnk:hover{border-color:#fff}
+.dots{display:inline-block;margin:0 .5em;opacity:.5}
+
+.pairs{display:grid;grid-template-columns:minmax(150px,200px) 1fr;column-gap:28px;row-gap:20px;text-align:left}
+.pairs .r{font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;opacity:.7;padding-top:6px}
+.pairs .o{font-size:clamp(16px,1.3vw,19px);font-weight:500;letter-spacing:-.01em;line-height:1.35}
+.pairs .o small{display:block;font-size:14px;font-weight:400;letter-spacing:.02em;opacity:.7;margin-top:3px}
+
+.fin{font-size:13px;letter-spacing:.34em;text-transform:uppercase;opacity:.8}
+
+/* ───────── finale: clouds, contact ───────── */
+.fade{height:40vh;margin-top:-40vh;position:relative;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(238,237,249,0),rgba(238,237,249,.7) 60%,var(--lav))}
+.finale{position:relative;z-index:2;color:var(--ink);min-height:100svh;padding:clamp(110px,16vh,170px) 16px 0;
+  background:var(--lav) url("assets/clouds.webp") calc(50% + var(--cpx,0px)) calc(100% + var(--cpy,0px))/max(104%,156vh) auto no-repeat;background-attachment:fixed}
+.finale .head{text-align:center}
+.finale .lbl{color:#6b6f8c;opacity:1}
+.finale h2{font-weight:500;letter-spacing:-.035em;line-height:1.02;font-size:clamp(44px,5.4vw,76px)}
+.finale .head p{font-size:clamp(17px,1.5vw,21px);color:#454956;margin-top:16px}
+.reach{text-align:center;margin-top:clamp(40px,7vh,64px)}
+/* contact icons: round, quiet, with a small label on hover */
+.icons{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.icons a{position:relative;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;color:var(--ink);
+  background:rgba(255,255,255,.72);border:1px solid rgba(15,17,20,.07);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 14px 30px -18px rgba(40,40,100,.45);
+  transition:transform .5s var(--ease),background .3s,color .3s}
+.icons a svg{width:22px;height:22px}
+.icons a:hover,.icons a:focus-visible{transform:translateY(-3px);background:#121316;color:#fff;outline:0}
+.icons a::after{content:attr(data-label);position:absolute;top:calc(100% + 10px);left:50%;transform:translate(-50%,-4px);
+  font-size:12px;font-weight:500;letter-spacing:.04em;white-space:nowrap;color:#5b5f6b;opacity:0;pointer-events:none;transition:opacity .3s,transform .4s var(--ease)}
+.icons a:hover::after,.icons a:focus-visible::after{opacity:1;transform:translate(-50%,0)}
+/* over the painting, in the credits */
+.icons.light{justify-content:flex-start}
+.icons.light a{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:#fff;box-shadow:none}
+.icons.light a:hover,.icons.light a:focus-visible{background:#fff;color:#121316}
+.icons.light a::after{color:#fff;text-shadow:0 1px 8px rgba(4,16,30,.5)}
+.finale{padding-bottom:clamp(160px,26vh,280px)}
+.finale::after{content:"";position:absolute;left:0;right:0;bottom:0;height:140px;background:linear-gradient(180deg,rgba(238,237,249,0),var(--lav));pointer-events:none}
+
+/* ───────── footer (micro1-style) ───────── */
+.foot{position:relative;z-index:2;color:var(--ink);overflow:hidden;padding:clamp(70px,10vh,110px) var(--gx) 0;
+  background:
+    radial-gradient(45% 55% at 18% 30%,rgba(214,226,246,.8),rgba(214,226,246,0) 70%),
+    linear-gradient(180deg,var(--lav),#f1f1f8 40%,#eceaf8)}
+/* warm glow that trails the cursor */
+.foot .glow{position:absolute;left:0;top:0;width:min(70vw,900px);aspect-ratio:1;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(closest-side,rgba(255,222,200,.75),rgba(255,226,206,.35) 45%,rgba(255,226,206,0));
+  transform:translate3d(var(--gx-px,60vw),var(--gy-px,40%),0) translate(-50%,-50%);will-change:transform}
+.foot > *:not(.glow){position:relative;z-index:1}
+.foot-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1100px;margin-left:auto;margin-right:0;width:min(100%,72vw)}
+.foot h6{font-size:14px;font-weight:400;color:#7b7f8f;margin-bottom:16px}
+.foot-cols a{display:block;width:max-content;max-width:100%;font-size:clamp(16px,1.2vw,19px);font-weight:500;letter-spacing:-.01em;margin-bottom:14px;overflow-wrap:anywhere;transition:opacity .3s}
+.foot-cols a:hover{opacity:.6}
+.foot-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:64px;padding:26px 0;border-top:1px solid rgba(15,17,20,.07);font-size:15px;color:#3b3f48}
+.foot-links{display:flex;gap:24px;flex-wrap:wrap}
+.foot-links a:hover{opacity:.6}
+.mark{margin:clamp(40px,8vh,90px) calc(-1 * var(--gx)) 0;height:clamp(40px,15.5vw,300px);overflow:hidden;display:flex;justify-content:center;pointer-events:none}
+.mark .word{font-weight:600;letter-spacing:-.06em;line-height:.78;font-size:clamp(48px,19.5vw,380px);white-space:nowrap;display:flex;
+  -webkit-mask-image:linear-gradient(180deg,#000 30%,rgba(0,0,0,.35) 100%);mask-image:linear-gradient(180deg,#000 30%,rgba(0,0,0,.35) 100%)}
+/* each letter carries its slice of one shared gradient, plus a violet bloom where the cursor is */
+.mark .ch{display:inline-block;color:transparent;-webkit-background-clip:text;background-clip:text;
+  background-image:
+    radial-gradient(circle at var(--hx,-999px) var(--hy,-999px),rgba(146,134,236,var(--ha,0)) 0,rgba(146,134,236,0) var(--hr,240px)),
+    linear-gradient(100deg,#ecebfb 0%,#c9c6f3 22%,#b7b1ef 48%,#cbc7f5 70%,#e9e8fb 100%);
+  background-size:100% 100%,var(--ww,100%) 100%;
+  background-position:0 0,calc(-1 * var(--lx,0px)) 0;background-repeat:no-repeat}
+
+/* ───────── contact: full-screen cloud sky ───────── */
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;visibility:hidden;pointer-events:none}
+.modal.open{visibility:visible;pointer-events:auto}
+.modal .sky{position:absolute;inset:0;background:var(--lav) url("assets/clouds.webp") calc(50% + var(--cpx,0px)) calc(100% + var(--cpy,0px))/max(104%,156vh) auto no-repeat;opacity:0;transform:scale(1.04);transition:opacity .6s,transform 1s var(--ease)}
+.modal.open .sky{opacity:1;transform:none}
+.sheet{position:relative;width:min(520px,100%);max-height:calc(100svh - 32px);overflow:auto;color:var(--ink);
+  background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.95);
+  backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);
+  border-radius:24px;padding:30px;box-shadow:0 50px 100px -40px rgba(60,60,130,.45);
+  opacity:0;transform:translateY(24px) scale(.97);transition:opacity .5s var(--ease) .1s,transform .7s var(--ease) .1s}
+.modal.open .sheet{opacity:1;transform:none}
+.sheet .x{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--ink);transition:background .3s,color .3s}
+.sheet .x:hover{background:#121316;color:#fff}
+.sheet .lbl{color:#6b6f8c;opacity:1;margin-bottom:12px;font-size:11.5px}
+.sheet h3{font-size:32px;font-weight:500;letter-spacing:-.03em}
+.sheet .lede{font-size:15px;color:var(--ink-2);margin:8px 0 20px;line-height:1.55}
+.sheet .icons{justify-content:flex-start;margin:6px 0 22px}
+
+/* ───────── responsive ───────── */
+@media (max-width:760px){
+  .nav{grid-template-columns:auto 1fr;padding:16px}
+  .nav-links{display:none}
+  .bar a.l{display:none}
+  .bar{width:calc(100% - 32px);justify-content:space-between}
+  :root{--col:100%}.blk.wide{max-width:100%}
+  .pairs{grid-template-columns:1fr;row-gap:4px}
+  .pairs .r{padding-top:20px}
+  .foot-cols{grid-template-columns:1fr 1fr;width:100%;gap:8px 24px}
+  .foot-cols > div:last-child{grid-column:1 / -1}
+  .finale,.modal .sky{background-size:auto 58%;background-position:left bottom;background-attachment:scroll}
+}
+@media (prefers-reduced-motion:reduce){
+  .world .paint{animation:none}
+  .hero .in{transition:none;opacity:1;transform:none;filter:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="world" aria-hidden="true">
+  <img class="paint" id="paint" src="assets/sky.webp" alt="">
+  <canvas id="birds"></canvas>
+  <div class="veil"></div>
+
+</div>
+
+<nav class="nav" id="nav">
+  <div class="nav-links">
+    <a href="#currently">About</a>
+    <a href="#work">Work</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+    <a href="#reach">Contact</a>
+  </div>
+  <a class="brand" href="#top">shreyas.</a>
+  <div class="nav-right">
+    <a href="https://github.com/shreyeahhs" target="_blank" rel="noopener">GitHub</a>
+    <a class="pill" href="#reach" data-contact>Contact <span class="sq"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5 8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+  </div>
+</nav>
+
+<div class="bar" id="bar">
+  <a class="b-brand" href="#top">shreyas.</a>
+  <a class="l" href="#currently">About</a>
+  <a class="l" href="#work">Work</a>
+  <a class="l" href="#experience">Experience</a>
+  <a class="l" href="#projects">Projects</a>
+  <button class="go" type="button" data-contact>Contact</button>
+</div>
+
+<main id="top">
+
+  <!-- title card -->
+  <header class="hero ts" id="hero">
+    <div class="eyebrow in">Data Science and AI · Glasgow</div>
+    <h1 class="in d1">Shreyas</h1>
+    <p class="role in d2">Administrator at the Centre for Data Science and AI, University of Glasgow</p>
+    <p class="also in d3">Prompt Corpus <span class="dots">·</span> Vele <span class="dots">·</span> Juggle</p>
+    <div class="scroll-hint"><span>Scroll</span><b></b></div>
+  </header>
+
+  <!-- the credits -->
+  <section class="credits ts">
+
+    <div class="blk" id="currently">
+      <div class="lbl cr">Currently</div>
+      <div class="name cr">Administrator</div>
+      <div class="det cr">Centre for Data Science and AI<br>University of Glasgow</div>
+    </div>
+
+    <div class="blk">
+      <div class="lbl cr">Education</div>
+      <div class="name cr">MSc Data Science</div>
+      <div class="det cr">University of Glasgow <span class="dots">·</span> 2025–2026</div>
+      <div class="gap"></div>
+      <div class="name cr">BE Artificial Intelligence and Data Science</div>
+      <div class="det cr">SDM Institute of Technology, Karnataka <span class="dots">·</span> 2021–2025</div>
+    </div>
+
+    <div class="blk">
+      <div class="lbl cr">Position</div>
+      <div class="name xl cr">Better prompts,<br>not bigger models.</div>
+      <p class="det cr" style="margin-top:28px">A precise prompt to an existing model often outperforms a vague one sent to a larger model, at lower cost and lower energy use. The method holds when the mechanism behind it is understood, which is where all of his teaching begins.</p>
+    </div>
+
+    <div class="blk" id="work">
+      <div class="lbl cr">Selected work</div>
+
+      <div class="name xl cr">Prompt Corpus</div>
+      <div class="det cr">A free written course in prompt engineering, taught from first principles</div>
+      <div class="det small cr">60 lessons <span class="dots">·</span> 8 tracks <span class="dots">·</span> 98 primary sources</div>
+      <div class="det cr"><a class="lnk" href="https://prompt-corpus.vercel.app" target="_blank" rel="noopener">prompt-corpus.vercel.app</a></div>
+
+      <div class="gap" style="height:110px"></div>
+      <div class="name xl cr">Vele</div>
+      <div class="det cr">A calendar that schedules from plain-language requests. The language model interprets each request, and a tested scheduling engine decides every time.</div>
+      <div class="det small cr">Open source <span class="dots">·</span> MIT licence</div>
+      <div class="det cr"><a class="lnk" href="https://github.com/shreyeahhs/vele" target="_blank" rel="noopener">Source</a></div>
+
+      <div class="gap" style="height:110px"></div>
+      <div class="name xl cr">Juggle</div>
+      <div class="det cr">A self-hosted gateway for AI API keys. One OpenAI-compatible endpoint with per-request key rotation and rate-limit handling. Keys are never stored.</div>
+      <div class="det small cr">Open source <span class="dots">·</span> MIT licence</div>
+      <div class="det cr"><a class="lnk" href="https://github.com/shreyeahhs/juggle" target="_blank" rel="noopener">Source</a><span class="dots">·</span><a class="lnk" href="https://juggle.onrender.com" target="_blank" rel="noopener">Live site</a></div>
+    </div>
+
+    <div class="blk wide" id="experience">
+      <div class="lbl cr">Experience</div>
+      <div class="pairs">
+        <div class="r cr">Administrator</div><div class="o cr">Centre for Data Science and AI<small>University of Glasgow · 2026–present</small></div>
+        <div class="r cr">Reach Out Ambassador</div><div class="o cr">University of Glasgow<small>IT Services and the James McCune Smith Learning Hub · 2026</small></div>
+        <div class="r cr">Volunteer Tutor</div><div class="o cr">Inclusive Homework Club<small>English and mathematics · 2025–2026</small></div>
+        <div class="r cr">Lead Developer</div><div class="o cr">EduDiagno, Technobeez Solutions<small>Backend and AI for an interview platform · 2025</small></div>
+        <div class="r cr">Data Analyst Intern</div><div class="o cr">Publicis Sapient, Sustainability<small>Bangalore · 2024</small></div>
+        <div class="r cr">AI Engineering Intern</div><div class="o cr">Publicis Sapient<small>Bangalore · 2023</small></div>
+        <div class="r cr">Data Analyst Intern</div><div class="o cr">GraphGeo Analytics<small>Bangalore · 2023</small></div>
+        <div class="r cr">Unit Leader</div><div class="o cr">National Service Scheme<small>SDM Institute of Technology · three years</small></div>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="lbl cr">Highlights</div>
+      <div class="det cr">More than 1,000 interviews run on the EduDiagno platform</div>
+      <div class="det cr">Pipelines processing over 100,000 sustainability metrics a day</div>
+      <div class="det cr">Emission reduction opportunities of 10 to 15 percent identified for clients</div>
+      <div class="det cr">Tutor of the Week, twice</div>
+    </div>
+
+    <div class="blk wide" id="projects">
+      <div class="lbl cr">Also built</div>
+      <div class="pairs">
+        <div class="r cr">Simulation</div><div class="o cr"><a class="lnk" href="https://living-ecosystem-simulator.onrender.com/" target="_blank" rel="noopener">Living Ecosystem Simulator</a><small>TypeScript, Canvas 2D · 2026</small></div>
+        <div class="r cr">Interactive</div><div class="o cr"><a class="lnk" href="https://shreyeahhs.github.io/jar-isle/" target="_blank" rel="noopener">Jar Isle</a><small>three.js, WebGL, WebAudio · 2026</small></div>
+        <div class="r cr">Analysis</div><div class="o cr"><a class="lnk" href="https://github.com/shreyeahhs/jlr-launch-delay-analysis" target="_blank" rel="noopener">JLR EV Launch Delay</a><small>Python, Pandas · 2025</small></div>
+        <div class="r cr">Machine learning</div><div class="o cr"><a class="lnk" href="https://github.com/shreyeahhs/digital-twin-jet-engine" target="_blank" rel="noopener">Twin Engine</a><small>Jet engine remaining-life prediction · 2024</small></div>
+        <div class="r cr">Hackathon</div><div class="o cr"><a class="lnk" href="https://github.com/shreyeahhs/GlasLet-sgow" target="_blank" rel="noopener">NightOut Planner</a><small>GUTS × SAS Scotland · 2024</small></div>
+        <div class="r cr">Language models</div><div class="o cr"><a class="lnk" href="https://github.com/shreyeahhs/YouTube-Video-Summarizer" target="_blank" rel="noopener">YouTube Summarizer</a><small>FastAPI, LangChain, Gemini · 2024</small></div>
+        <div class="r cr">Dashboards</div><div class="o cr"><a class="lnk" href="https://github.com/shreyeahhs/powerbi-projects-showcase" target="_blank" rel="noopener">Power BI collection</a><small>Six dashboards, free to download</small></div>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="lbl cr">Tools</div>
+      <div class="det cr">Python <span class="dots">·</span> SQL <span class="dots">·</span> TypeScript <span class="dots">·</span> JavaScript</div>
+      <div class="det cr">Scikit-learn <span class="dots">·</span> PyTorch <span class="dots">·</span> FastAPI <span class="dots">·</span> React <span class="dots">·</span> Next.js <span class="dots">·</span> PostgreSQL</div>
+      <div class="det cr">Power BI <span class="dots">·</span> DAX <span class="dots">·</span> Tableau</div>
+    </div>
+
+    <div class="blk">
+      <div class="lbl cr">Outside work</div>
+      <div class="det cr">Cooking, from traditional recipes to fusion</div>
+      <div class="det cr">Genshin Impact and Red Dead Redemption 2</div>
+      <div class="det cr">Reading the Shiva Trilogy by Amish Tripathi</div>
+      <div class="det cr">A growing collection of Hot Wheels</div>
+    </div>
+
+    <div class="blk" id="contact">
+      <div class="lbl cr">Contact</div>
+      <div class="cr"><div class="icons light">
+        <a href="mailto:gowdashreyas364@gmail.com" aria-label="Email" data-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></a>
+        <a href="https://www.linkedin.com/in/shreyas-gowda-5316b51b1/" target="_blank" rel="noopener" aria-label="LinkedIn" data-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg></a>
+        <a href="https://www.instagram.com/shreyeahhs/" target="_blank" rel="noopener" aria-label="Instagram" data-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://github.com/shreyeahhs" target="_blank" rel="noopener" aria-label="GitHub" data-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57l-.02-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.31-5.47-1.34-5.47-5.94 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22l-.01 3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg></a>
+      </div></div>
+    </div>
+
+    <div class="blk" style="margin-bottom:0">
+      <div class="fin cr">Glasgow, 2026</div>
+    </div>
+  </section>
+
+  <div class="fade" aria-hidden="true"></div>
+
+  <!-- after the credits -->
+  <section class="finale" id="reach">
+    <div class="head">
+      <div class="lbl">After the credits</div>
+      <h2>Get in touch</h2>
+      <p>Email is the quickest way to reach me.</p>
+    </div>
+    <div class="reach">
+      <div class="icons">
+        <a href="mailto:gowdashreyas364@gmail.com" aria-label="Email" data-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></a>
+        <a href="https://www.linkedin.com/in/shreyas-gowda-5316b51b1/" target="_blank" rel="noopener" aria-label="LinkedIn" data-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg></a>
+        <a href="https://www.instagram.com/shreyeahhs/" target="_blank" rel="noopener" aria-label="Instagram" data-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://github.com/shreyeahhs" target="_blank" rel="noopener" aria-label="GitHub" data-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57l-.02-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.31-5.47-1.34-5.47-5.94 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22l-.01 3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-cols">
+      <div><h6>Work</h6>
+        <a href="https://prompt-corpus.vercel.app" target="_blank" rel="noopener">Prompt Corpus</a>
+        <a href="https://github.com/shreyeahhs/vele" target="_blank" rel="noopener">Vele</a>
+        <a href="https://github.com/shreyeahhs/juggle" target="_blank" rel="noopener">Juggle</a>
+      </div>
+      <div><h6>Elsewhere</h6>
+        <a href="https://github.com/shreyeahhs" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/shreyas-gowda-5316b51b1/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/shreyeahhs/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+      <div><h6>Contact</h6>
+        <a href="mailto:gowdashreyas364@gmail.com">Email</a>
+        <a href="#reach">All contact options</a>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>© 2026 Shreyas</span>
+      <span class="foot-links"><a href="#top">Back to top</a><a href="#reach">Contact</a><span>Glasgow, Scotland</span></span>
+    </div>
+    <div class="mark" aria-hidden="true"><span class="word">shreyeahhs</span></div>
+    <div class="glow" aria-hidden="true"></div>
+  </footer>
+</main>
+<div class="tex" aria-hidden="true"></div>
+<div class="tex fine" aria-hidden="true"></div>
+
+<!-- contact -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" aria-hidden="true">
+  <div class="sky" data-close></div>
+  <div class="sheet">
+    <button class="x" type="button" data-close aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <div class="lbl">Contact</div>
+    <h3 id="mTitle">Get in touch</h3>
+    <p class="lede">Email is the quickest way to reach me.</p>
+    <div class="icons">
+        <a href="mailto:gowdashreyas364@gmail.com" aria-label="Email" data-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></a>
+        <a href="https://www.linkedin.com/in/shreyas-gowda-5316b51b1/" target="_blank" rel="noopener" aria-label="LinkedIn" data-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg></a>
+        <a href="https://www.instagram.com/shreyeahhs/" target="_blank" rel="noopener" aria-label="Instagram" data-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://github.com/shreyeahhs" target="_blank" rel="noopener" aria-label="GitHub" data-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57l-.02-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.31-5.47-1.34-5.47-5.94 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22l-.01 3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg></a>
+      </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const root = document.documentElement;
+
+/* ── title card in ── */
+requestAnimationFrame(()=>$('#hero').classList.add('on'));
+
+/* ── nav swap, veil, credit fades ── */
+const nav=$('#nav'), bar=$('#bar'), crs=[...document.querySelectorAll('.cr')];
+let ticking=false;
+function frame(){
+  ticking=false;
+  const vh=innerHeight, y=scrollY;
+  const past=y>vh*.72; bar.classList.toggle('show',past); nav.classList.toggle('hide',past);
+  root.style.setProperty('--v',Math.min(1,y/(vh*.7)).toFixed(3));
+  // the readable band: lines are fully lit between 22% and 64% of the screen (sky over the
+  // left slope), fading in from 80% (above the bright valley haze) and out by 10% (under the nav)
+  const narrow=innerWidth<760;
+  const top0=vh*.10, top1=vh*.22, bot1=vh*(narrow?.52:.64), bot0=vh*(narrow?.66:.80);
+  for(const el of crs){
+    const r=el.getBoundingClientRect(), c=r.top+r.height/2;
+    let o=1;
+    if(c>bot1) o=(bot0-c)/(bot0-bot1); else if(c<top1) o=(c-top0)/(top1-top0);
+    o=Math.max(0,Math.min(1,o));
+    el.style.opacity=o.toFixed(3);
+    el.style.transform=`translateY(${((1-o)*(c>bot1?14:-10)).toFixed(1)}px)`;
+  }
+}
+const req=()=>{if(!ticking){ticking=true;requestAnimationFrame(frame)}};
+addEventListener('scroll',req,{passive:true});addEventListener('resize',req);frame();
+
+/* ── gentle parallax on the painting ── */
+const paint=$('#paint');let mx=0,my=0,cx=0,cy=0;
+addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2},{passive:true});
+function drift(){cx+=(mx-cx)*.04;cy+=(my-cy)*.04;paint.style.translate=`${(-cx*9).toFixed(2)}px ${(-cy*6).toFixed(2)}px`;requestAnimationFrame(drift)}
+
+/* ── birds ── */
+/* Each bird: two-segment wings (shoulder + wrist), a quick downstroke and a slower
+   recovery, glides between flap bursts, banking into turns, and depth: far birds are
+   smaller, paler and slower. Flocks hold a loose V. */
+const bc=$('#birds'), bx=bc.getContext('2d');
+let flocks=[], W=innerWidth, H=innerHeight, px=-9999, py=-9999;
+const R=(a,b)=>a+Math.random()*(b-a);
+function sizeBirds(){W=innerWidth;H=innerHeight;const d=Math.min(devicePixelRatio||1,2);bc.width=W*d;bc.height=H*d;bx.setTransform(d,0,0,d,0,0)}
+addEventListener('pointermove',e=>{px=e.clientX;py=e.clientY},{passive:true});
+addEventListener('pointerleave',()=>{px=py=-9999});
+const unit=()=>Math.min(1.25,Math.max(.7,W/1400));
+
+function makeBird(x,y,depth){
+  return {x,y,vx:0,vy:0,depth,s:(4+depth*9)*unit()*R(.9,1.1),ph:R(0,6.28),
+    hz:R(2.6,3.4)*(1.15-depth*.35),mode:Math.random()<.5?'flap':'glide',timer:R(.3,2.2),
+    bank:0,startle:0,ox:0,oy:0,wob:R(0,6.28)};
+}
+function spawnFlock(initial){
+  const depth=Math.pow(Math.random(),.8), dir=Math.random()<.72?1:-1;
+  const n=Math.random()<.3?1:Math.round(R(2,6));
+  const y=H*R(.08,.42);
+  const x=initial?R(.1,.9)*W:(dir>0?-80:W+80);
+  const speed=(14+depth*30)*R(.85,1.15)*unit();
+  const spacing=(10+depth*22)*unit();
+  const f={x,y,dir,speed,depth,t:R(0,100),climb:R(-.25,.25),members:[]};
+  for(let i=0;i<n;i++){
+    // loose V: alternate sides, trailing back from the leader
+    const k=Math.ceil(i/2), side=i%2?1:-1;
+    const b=makeBird(x,y,depth*R(.9,1.05));
+    b.ox=-dir*k*spacing*R(.8,1.3); b.oy=side*k*spacing*R(.45,.75)+R(-4,4);
+    b.x=x+b.ox; b.y=y+b.oy;
+    f.members.push(b);
+  }
+  flocks.push(f);
+}
+function wingShape(b){
+  // returns [shoulder angle, wrist bend, stroke]; up is +
+  if(b.mode==='flap'){
+    const p=b.ph, f=Math.sin(p+.45*Math.sin(p));   // quick downstroke, slower upstroke
+    return [f*.95, -f*.6-.12, f];
+  }
+  // gull glide: shoulders lifted, hands angled down into a soft M, with a slow breathing sway
+  const sway=Math.sin(b.ph*.25)*.05;
+  return [.34+sway, -.68-sway, .2];
+}
+function drawBird(b,dir){
+  const s=b.s, [shoulder,wrist,f]=wingShape(b);
+  const span=.92+.08*Math.cos(f*1.4);   // slight foreshortening at the top of the stroke
+  const near=1.12, far=.86;             // 3/4 view: near wing a touch longer
+  // atmosphere: far birds take on the sky colour
+  const d=b.depth, r=Math.round(18+(1-d)*62), g=Math.round(28+(1-d)*78), bl=Math.round(40+(1-d)*92);
+  const a=.55+d*.38;
+  bx.save();
+  bx.translate(b.x,b.y);
+  bx.rotate(b.bank);
+  bx.scale(dir,1);
+  bx.fillStyle=`rgba(${r},${g},${bl},${a})`;
+  for(const side of [-1,1]){
+    const L=(side>0?near:far)*span;
+    const L1=s*.55*L, L2=s*.72*L;
+    const sx=side*s*.1, sy=0;
+    const wx=sx+side*L1*Math.cos(shoulder), wy=sy-L1*Math.sin(shoulder);
+    const ta=shoulder+wrist;
+    const tx=wx+side*L2*Math.cos(ta), ty=wy-L2*Math.sin(ta);
+    // trailing edge sits a chord behind the leading edge, tapering to the tip
+    const c1=s*.24, c2=s*.15;
+    bx.beginPath();
+    bx.moveTo(sx,sy-s*.04);
+    bx.quadraticCurveTo((sx+wx)/2,(sy+wy)/2-s*.08,wx,wy);           // leading edge, inner
+    bx.quadraticCurveTo((wx+tx)/2+side*s*.02,(wy+ty)/2-s*.05,tx,ty); // leading edge, outer
+    bx.quadraticCurveTo((wx+tx)/2,(wy+ty)/2+c2,wx-side*s*.04,wy+c2*1.1); // trailing edge, outer
+    bx.quadraticCurveTo((sx+wx)/2,(sy+wy)/2+c1,sx,sy+s*.12);        // trailing edge, inner
+    bx.closePath();bx.fill();
+  }
+  // body, head and tail
+  bx.beginPath();bx.ellipse(s*.05,s*.05,s*.32,s*.11,0,0,7);bx.fill();
+  bx.beginPath();bx.arc(s*.36,s*.0,s*.085,0,7);bx.fill();
+  bx.beginPath();bx.moveTo(-s*.22,s*.03);bx.lineTo(-s*.5,-s*.03);bx.lineTo(-s*.47,s*.13);bx.closePath();bx.fill();
+  bx.restore();
+}
+function stepBird(b,dt,tx,ty,dir,t){
+  // flap / glide rhythm
+  b.timer-=dt;
+  if(b.timer<=0){
+    if(b.mode==='flap'){b.mode='glide';b.timer=R(.8,2.6)}
+    else{b.mode='flap';b.timer=R(.7,2.2);b.ph=-Math.PI/2}
+  }
+  // startle: a cursor nearby makes it flap hard and veer
+  const dx=b.x-px, dy=b.y-py, dd=Math.hypot(dx,dy), reach=110+b.depth*60;
+  if(dd<reach){b.startle=1;b.mode='flap';b.timer=Math.max(b.timer,.8);
+    b.vx+=dx/dd*260*dt*(1-dd/reach)*2; b.vy+=dy/dd*260*dt*(1-dd/reach)*2;}
+  b.startle=Math.max(0,b.startle-dt*.6);
+  b.ph+=b.hz*Math.PI*2*dt*(b.mode==='flap'?1+b.startle*.8:.25);
+  // spring toward its slot in the formation, with a little individual wander
+  b.wob+=dt*R(.6,1);
+  const gx=tx+b.ox+Math.sin(b.wob)*3, gy=ty+b.oy+Math.cos(b.wob*1.3)*3;
+  b.vx+=((gx-b.x)*2.2-b.vx*1.6)*dt;
+  b.vy+=((gy-b.y)*2.2-b.vy*1.6)*dt;
+  // lift: gliding birds sink slightly, flapping ones rise
+  b.vy+=(b.mode==='glide'?4:-3)*dt;
+  b.x+=b.vx*dt; b.y+=b.vy*dt;
+  const want=Math.max(-.35,Math.min(.35,b.vy/120))*dir;
+  b.bank+=(want-b.bank)*Math.min(1,dt*3);
+}
+let last=performance.now(), nextFlock=performance.now()+R(12000,20000);
+function tick(t){
+  const dt=Math.min(.05,(t-last)/1000);last=t;
+  bx.clearRect(0,0,W,H);
+  if(t>nextFlock){spawnFlock(false);nextFlock=t+R(22000,40000)}
+
+  // far flocks first so near birds pass in front
+  flocks.sort((a,b)=>a.depth-b.depth);
+  for(const f of flocks){
+    f.t+=dt;
+    f.x+=f.dir*f.speed*dt;
+    f.y+=(Math.sin(f.t*.35)*6+f.climb*4)*dt;
+    for(const b of f.members){stepBird(b,dt,f.x,f.y,f.dir,t);drawBird(b,f.dir)}
+  }
+  flocks=flocks.filter(f=>f.members.some(b=>b.x>-160&&b.x<W+160));
+  requestAnimationFrame(tick);
+}
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(sizeBirds,150)});
+sizeBirds();
+if(!reduce){spawnFlock(true);requestAnimationFrame(tick);requestAnimationFrame(drift)}
+else{spawnFlock(true);spawnFlock(true);for(const f of flocks)for(const b of f.members)drawBird(b,f.dir)}
+
+/* ── the bottom reacts to the cursor ──
+   a violet bloom follows the pointer across the wordmark, the footer's warm glow trails it,
+   and the cloud art drifts against it. Runs only while that part of the page is on screen. */
+{
+  const foot=$('.foot'), word=$('.mark .word'), glow=$('.foot .glow'), fin=$('#reach'), msky=$('#modal .sky'), modalEl=$('#modal');
+  word.innerHTML=[...word.textContent].map(c=>`<span class="ch">${c}</span>`).join('');
+  const chs=[...word.children].map(el=>({el,lx:0,w:0}));
+  let fs=100;
+  function measure(){
+    const wr=word.getBoundingClientRect();
+    fs=parseFloat(getComputedStyle(word).fontSize);
+    for(const c of chs){
+      c.el.style.transform='';
+      const r=c.el.getBoundingClientRect();
+      c.lx=r.left-wr.left; c.w=r.width;
+      c.el.style.setProperty('--lx',c.lx+'px'); c.el.style.setProperty('--ww',wr.width+'px');
+      c.el.style.setProperty('--hr',(fs*1.1)+'px');
+    }
+  }
+  measure(); document.fonts&&document.fonts.ready.then(measure);
+  let mrt; addEventListener('resize',()=>{clearTimeout(mrt);mrt=setTimeout(measure,150)});
+
+  let cX=-1,cY=-1,sX=innerWidth*.6,sY=innerHeight*.6,mouse=false,gx=0,gy=0,cpx=0,cpy=0;
+  addEventListener('pointermove',e=>{cX=e.clientX;cY=e.clientY;mouse=e.pointerType==='mouse'},{passive:true});
+  document.addEventListener('pointerleave',()=>{cX=cY=-1});
+
+  const seen={foot:false,fin:false};
+  new IntersectionObserver(es=>es.forEach(e=>{seen[e.target===foot?'foot':'fin']=e.isIntersecting;if(e.isIntersecting)kick()}),{rootMargin:'80px'}).observe(foot);
+  new IntersectionObserver(es=>es.forEach(e=>{seen.fin=e.isIntersecting;if(e.isIntersecting)kick()}),{rootMargin:'80px'}).observe(fin);
+  let running=false;
+  const kick=()=>{if(!running&&!reduce){running=true;requestAnimationFrame(loop)}};
+  const lerp=(a,b,k)=>a+(b-a)*k;
+
+  function loop(t){
+    const modalOpen=modalEl.classList.contains('open');
+    if(!seen.foot&&!seen.fin&&!modalOpen){running=false;return}
+    const W=innerWidth,H=innerHeight, has=mouse&&cX>=0;
+    sX=lerp(sX,has?cX:W*.6,.12); sY=lerp(sY,has?cY:H*.7,.12);
+
+    // clouds drift against the cursor
+    const nx=has?cX/W-.5:0, ny=has?cY/H-.5:0;
+    cpx=lerp(cpx,-nx*28,.06); cpy=lerp(cpy,-ny*12,.06);
+    const cxs=cpx.toFixed(1)+'px', cys=cpy.toFixed(1)+'px';
+    if(seen.fin){fin.style.setProperty('--cpx',cxs);fin.style.setProperty('--cpy',cys)}
+    if(modalOpen){msky.style.setProperty('--cpx',cxs);msky.style.setProperty('--cpy',cys)}
+
+    if(seen.foot){
+      const fr=foot.getBoundingClientRect(), inside=has&&cY>=fr.top;
+      // glow: follows the cursor inside the footer, rests centre-right otherwise
+      gx=lerp(gx,inside?sX-fr.left:fr.width*.62,.08); gy=lerp(gy,inside?sY-fr.top:fr.height*.55,.08);
+      glow.style.setProperty('--gx-px',gx.toFixed(1)+'px'); glow.style.setProperty('--gy-px',gy.toFixed(1)+'px');
+
+      // wordmark letters
+      const wr=word.getBoundingClientRect();
+      const prox=inside?Math.max(0,Math.min(1,1-(wr.top-sY)/(H*.45))):0;
+      // colour only: the letters stay put, a violet bloom follows the cursor across them
+      for(const c of chs){
+        c.el.style.setProperty('--hx',(sX-wr.left-c.lx).toFixed(1)+'px');
+        c.el.style.setProperty('--hy',(sY-wr.top).toFixed(1)+'px');
+        c.el.style.setProperty('--ha',(has?.85*prox:0).toFixed(3));
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  // the contact sky also drifts while the dialog is open
+  new MutationObserver(kick).observe(modalEl,{attributes:true,attributeFilter:['class']});
+}
+
+/* ── contact: no form, no server. Email opens the visitor's mail app. ── */
+const modal=$('#modal');
+let lastFocus=null;
+function openModal(){lastFocus=document.activeElement;modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>modal.querySelector('.icons a').focus(),300)}
+function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';lastFocus&&lastFocus.focus&&lastFocus.focus({preventScroll:true})}
+document.addEventListener('click',e=>{if(e.target.closest('[data-contact]')){e.preventDefault();openModal()} if(e.target.closest('[data-close]'))closeModal()});
+document.addEventListener('keydown',e=>{
+  if(!modal.classList.contains('open'))return;
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Tab'){const f=[...modal.querySelectorAll('a,button')];const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
+});
+})();
+</script>
+</body>
+</html>
